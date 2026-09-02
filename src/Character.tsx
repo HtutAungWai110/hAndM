@@ -15,28 +15,33 @@ interface CharacterProps {
 }
 
 const dracoLoader = new DRACOLoader()
-dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.5/')
 
-const attachManager = (loader: GLTFLoader) => {
+function attachDRACO(loader: GLTFLoader) {
   loader.manager = assetManager
   loader.setDRACOLoader(dracoLoader)
 }
 
-useLoader.preload(GLTFLoader, idleUrl, attachManager)
-useLoader.preload(GLTFLoader, kissUrl, attachManager)
+useLoader.preload(GLTFLoader, idleUrl, attachDRACO)
+useLoader.preload(GLTFLoader, kissUrl, attachDRACO)
 
 export function Character({ isKissing, onKissEnd }: CharacterProps) {
   const idleRef = useRef<Group>(null)
   const kissRef = useRef<Group>(null)
   const finishedRef = useRef(false)
 
-  const idle = useLoader(GLTFLoader, idleUrl, attachManager)
-  const kiss = useLoader(GLTFLoader, kissUrl, attachManager)
-  const { actions: idleActions } = useAnimations(idle.animations, idleRef)
-  const { actions: kissActions, mixer: kissMixer } = useAnimations(kiss.animations, kissRef)
-  const kissAction = kissActions[Object.keys(kissActions)[0]]
+  const idle = useLoader(GLTFLoader, idleUrl, attachDRACO)
+  const kiss = useLoader(GLTFLoader, kissUrl, attachDRACO)
+
+  const idleAnims = idle.animations?.length > 0 ? idle.animations : []
+  const kissAnims = kiss.animations?.length > 0 ? kiss.animations : []
+
+  const { actions: idleActions } = useAnimations(idleAnims, idleRef)
+  const { actions: kissActions, mixer: kissMixer } = useAnimations(kissAnims, kissRef)
+
+  const kissAction = kissAnims.length > 0 ? kissActions[Object.keys(kissActions)[0]] : undefined
 
   useEffect(() => {
+    if (idleAnims.length === 0) return
     const name = Object.keys(idleActions)[0]
     const action = name ? idleActions[name] : undefined
     if (!action) return
@@ -45,10 +50,10 @@ export function Character({ isKissing, onKissEnd }: CharacterProps) {
     } else {
       action.reset().fadeIn(0.3).play()
     }
-  }, [idleActions, isKissing])
+  }, [idleActions, isKissing, idleAnims.length])
 
   useEffect(() => {
-    if (!isKissing || !kissAction) return
+    if (!isKissing || !kissAction || kissAnims.length === 0) return
     finishedRef.current = false
     kissAction.reset().fadeIn(0.1)
     kissAction.setLoop(THREE.LoopOnce, 1)
@@ -63,7 +68,7 @@ export function Character({ isKissing, onKissEnd }: CharacterProps) {
     return () => {
       kissMixer.removeEventListener('finished', onFinished)
     }
-  }, [kissAction, isKissing, kissMixer, onKissEnd])
+  }, [kissAction, isKissing, kissMixer, onKissEnd, kissAnims.length])
 
   useFrame(() => {
     if (!isKissing || !kissAction || finishedRef.current) return

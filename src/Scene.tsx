@@ -7,18 +7,11 @@ import { useCallback, useState } from 'react'
 const CAMERA_POSITION = new THREE.Vector3(-0.062, 1.233, 0.92)
 const CAMERA_TARGET = new THREE.Vector3(0, 1.3, 0)
 
-function CameraLogger() {
+function CameraLock() {
   const { camera } = useThree()
   useFrame(() => {
     camera.position.copy(CAMERA_POSITION)
     camera.lookAt(CAMERA_TARGET)
-    const pos = camera.position
-    const rot = camera.rotation
-    const fov = (camera as THREE.PerspectiveCamera).fov
-    console.log(
-      `CAMERA [${pos.x.toFixed(3)}, ${pos.y.toFixed(3)}, ${pos.z.toFixed(3)}] ` +
-      `rot=[${rot.x.toFixed(3)}, ${rot.y.toFixed(3)}, ${rot.z.toFixed(3)}] fov=${fov.toFixed(2)}`
-    )
   })
   return null
 }
@@ -48,7 +41,7 @@ export function Scene() {
         />
         <Character isKissing={isKissing} onKissEnd={handleKissEnd} />
         <OrbitControls />
-        <CameraLogger />
+        <CameraLock />
       </Canvas>
       <button
         onClick={() => setIsKissing(true)}

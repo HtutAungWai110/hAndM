@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { Scene } from './Scene'
 import { getSnapshot, subscribe } from './loader'
+import { ErrorBoundary } from './ErrorBoundary'
 
 function LoadingScreen() {
-  const { loaded, total } = useSyncExternalStore(subscribe, getSnapshot)
+  const { loaded, total, error } = useSyncExternalStore(subscribe, getSnapshot)
   const [visible, setVisible] = useState(false)
   const doneRef = useRef(false)
 
@@ -11,11 +12,12 @@ function LoadingScreen() {
 
   useEffect(() => {
     if (doneRef.current) return
-    if (total > 0) setVisible(true)
-  }, [total])
+    if (total > 0 || error) setVisible(true)
+  }, [total, error])
 
   useEffect(() => {
     if (doneRef.current) return
+    if (error) return
     if (total > 0 && loaded >= total) {
       const t = setTimeout(() => {
         doneRef.current = true
@@ -23,7 +25,7 @@ function LoadingScreen() {
       }, 600)
       return () => clearTimeout(t)
     }
-  }, [loaded, total])
+  }, [loaded, total, error])
 
   return (
     <div
@@ -44,45 +46,76 @@ function LoadingScreen() {
         fontFamily: 'sans-serif',
       }}
     >
-      <div
-        style={{
-          fontSize: 20,
-          fontWeight: 700,
-          letterSpacing: 4,
-        }}
-      >
-        LOADING
-      </div>
-      <div
-        style={{
-          width: 280,
-          height: 8,
-          borderRadius: 4,
-          background: '#3a3a3a',
-          overflow: 'hidden',
-        }}
-      >
-        <div
-          style={{
-            width: `${progress}%`,
-            height: '100%',
-            borderRadius: 4,
-            background: '#e91e63',
-            transition: 'width 0.2s ease',
-          }}
-        />
-      </div>
-      <div style={{ fontSize: 14, color: '#aaa' }}>{progress}%</div>
+      {error ? (
+        <>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#ff5252' }}>
+            Loading failed
+          </div>
+          <div style={{ fontSize: 13, color: '#aaa', maxWidth: 400, textAlign: 'center', lineHeight: 1.5 }}>
+            {error}
+          </div>
+          <button
+            onClick={() => location.reload()}
+            style={{
+              marginTop: 8,
+              padding: '10px 24px',
+              borderRadius: 8,
+              border: 'none',
+              background: '#e91e63',
+              color: '#fff',
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >
+            Retry
+          </button>
+        </>
+      ) : (
+        <>
+          <div
+            style={{
+              fontSize: 20,
+              fontWeight: 700,
+              letterSpacing: 4,
+            }}
+          >
+            LOADING
+          </div>
+          <div
+            style={{
+              width: 280,
+              height: 8,
+              borderRadius: 4,
+              background: '#3a3a3a',
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                width: `${progress}%`,
+                height: '100%',
+                borderRadius: 4,
+                background: '#e91e63',
+                transition: 'width 0.2s ease',
+              }}
+            />
+          </div>
+          <div style={{ fontSize: 14, color: '#aaa' }}>{progress}%</div>
+        </>
+      )}
     </div>
   )
 }
 
 function App() {
   return (
-    <div style={{ width: '100vw', height: '100vh' }}>
-      <Scene />
-      <LoadingScreen />
-    </div>
+    <ErrorBoundary>
+      <div style={{ width: '100vw', height: '100vh' }}>
+        <Scene />
+        <LoadingScreen />
+      </div>
+    </ErrorBoundary>
   )
 }
 

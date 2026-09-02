@@ -1,16 +1,17 @@
 import * as THREE from 'three'
 
-interface LoaderState {
+export interface LoaderState {
   loaded: number
   total: number
+  error: string | null
 }
 
-let state: LoaderState = { loaded: 0, total: 0 }
+let state: LoaderState = { loaded: 0, total: 0, error: null }
 const listeners = new Set<() => void>()
 
-function set(next: LoaderState) {
+function emit(next: LoaderState) {
   state = next
-  listeners.forEach((listener) => listener())
+  listeners.forEach((fn) => fn())
 }
 
 function subscribe(listener: () => void) {
@@ -25,9 +26,16 @@ function getSnapshot(): LoaderState {
 }
 
 export const assetManager = new THREE.LoadingManager()
-assetManager.onStart = (_url, loaded, total) => set({ loaded, total })
-assetManager.onProgress = (_url, loaded, total) => set({ loaded, total })
-assetManager.onLoad = () => {}   // loaded === total already set by final onProgress
-assetManager.onError = () => set({ loaded: 1, total: 1 })
+assetManager.onStart = (_url, loaded, total) => {
+  emit({ loaded, total, error: null })
+}
+assetManager.onProgress = (_url, loaded, total) => {
+  emit({ loaded, total, error: null })
+}
+assetManager.onLoad = () => {}
+assetManager.onError = (url) => {
+  console.error('[assetManager] failed to load:', url)
+  emit({ loaded: 0, total: 0, error: `Failed to load: ${url}` })
+}
 
 export { subscribe, getSnapshot }
