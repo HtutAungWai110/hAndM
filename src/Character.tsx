@@ -6,8 +6,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import * as THREE from 'three'
 import { assetManager } from './loader'
-import idleUrl from './assets/idle_animation_export.glb'
-import kissUrl from './assets/boy_kiss_animation_export.glb'
+import idleUrl from './assets/idle_compressed.glb'
+import kissUrl from './assets/boy_kiss_compressed.glb'
 
 interface CharacterProps {
   isKissing: boolean
