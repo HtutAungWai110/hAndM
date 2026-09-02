@@ -6,11 +6,13 @@ import { useCallback, useState } from 'react'
 
 const CAMERA_POSITION = new THREE.Vector3(-0.062, 1.233, 0.92)
 const CAMERA_TARGET = new THREE.Vector3(0, 1.3, 0)
+const CAMERA_POSITION_MOBILE = new THREE.Vector3(-0.062, 1.45, 2.4)
 
 function CameraLock() {
-  const { camera } = useThree()
+  const { camera, size } = useThree()
+  const isMobile = size.width < 640
   useFrame(() => {
-    camera.position.copy(CAMERA_POSITION)
+    camera.position.copy(isMobile ? CAMERA_POSITION_MOBILE : CAMERA_POSITION)
     camera.lookAt(CAMERA_TARGET)
   })
   return null
