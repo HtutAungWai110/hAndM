@@ -33,11 +33,11 @@ export function Scene() {
         <hemisphereLight
           color="#ffffff"
           groundColor="#8a7a55"
-          intensity={0.55}
+          intensity={0.5}
         />
         <directionalLight
           position={[-4, 6, -3]}
-          intensity={0.3}
+          intensity={1}
           color="#fff4e0"
           castShadow
         />
