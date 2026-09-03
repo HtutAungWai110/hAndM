@@ -3,22 +3,14 @@ import { useAnimations } from '@react-three/drei'
 import { useEffect, useRef } from 'react'
 import type { Group } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import * as THREE from 'three'
-import { assetManager } from './loader'
+import { attachDRACO } from './draco'
 import idleUrl from './assets/idle_compressed.glb'
 import kissUrl from './assets/boy_kiss_compressed.glb'
 
 interface CharacterProps {
   isKissing: boolean
   onKissEnd: () => void
-}
-
-const dracoLoader = new DRACOLoader()
-
-function attachDRACO(loader: GLTFLoader) {
-  loader.manager = assetManager
-  loader.setDRACOLoader(dracoLoader)
 }
 
 useLoader.preload(GLTFLoader, idleUrl, attachDRACO)

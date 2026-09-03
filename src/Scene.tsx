@@ -1,6 +1,6 @@
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
-import { OrbitControls, Grid } from '@react-three/drei'
 import { Character } from './Character'
+import { Sky } from './Sky'
 import * as THREE from 'three'
 import { useCallback, useState } from 'react'
 
@@ -21,28 +21,27 @@ function CameraLock() {
 export function Scene() {
   const [isKissing, setIsKissing] = useState(false)
   const handleKissEnd = useCallback(() => setIsKissing(false), [])
+  const isMobile = window.innerWidth < 640
+  const initialCamera = isMobile ? CAMERA_POSITION_MOBILE : CAMERA_POSITION
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <Canvas
-        camera={{ position: CAMERA_POSITION, fov: 50 }}
-        scene={{ background: new THREE.Color('#505050') }}
+        camera={{ position: initialCamera, fov: 50 }}
       >
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[5, 5, 5]} intensity={1} />
-        <Grid
-          cellSize={1}
-          cellThickness={1}
-          cellColor="#666666"
-          sectionSize={5}
-          sectionThickness={1.5}
-          sectionColor="#9b9b9b"
-          fadeDistance={50}
-          fadeStrength={1}
-          infiniteGrid
+        <Sky />
+        <hemisphereLight
+          color="#ffffff"
+          groundColor="#8a7a55"
+          intensity={0.55}
+        />
+        <directionalLight
+          position={[-4, 6, -3]}
+          intensity={0.3}
+          color="#fff4e0"
+          castShadow
         />
         <Character isKissing={isKissing} onKissEnd={handleKissEnd} />
-        <OrbitControls />
         <CameraLock />
       </Canvas>
       <button
