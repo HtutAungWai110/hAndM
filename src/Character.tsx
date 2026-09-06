@@ -24,6 +24,23 @@ export function Character({ isKissing, onKissEnd }: CharacterProps) {
   const idle = useLoader(GLTFLoader, idleUrl, attachDRACO)
   const kiss = useLoader(GLTFLoader, kissUrl, attachDRACO)
 
+  const kissAvailable = kiss.animations?.length > 0
+
+  useEffect(() => {
+    if (isKissing && !kissAvailable) {
+      const t = setTimeout(onKissEnd, 50)
+      return () => clearTimeout(t)
+    }
+  }, [isKissing, kissAvailable, onKissEnd])
+
+  useEffect(() => {
+    for (const root of [idle.scene, kiss.scene]) {
+      root.traverse((obj) => {
+        if ((obj as THREE.Mesh).isMesh) (obj as THREE.Mesh).castShadow = true
+      })
+    }
+  }, [idle.scene, kiss.scene])
+
   const idleAnims = idle.animations?.length > 0 ? idle.animations : []
   const kissAnims = kiss.animations?.length > 0 ? kiss.animations : []
 

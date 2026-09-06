@@ -8,10 +8,30 @@ export interface LoaderState {
 
 let state: LoaderState = { loaded: 0, total: 0, error: null }
 const listeners = new Set<() => void>()
+let pending: LoaderState | null = null
+let timer: ReturnType<typeof setTimeout> | null = null
+
+const THROTTLE_MS = 40
+
+function flush() {
+  timer = null
+  if (pending) {
+    state = pending
+    pending = null
+    listeners.forEach((fn) => fn())
+  }
+}
 
 function emit(next: LoaderState) {
-  state = next
-  listeners.forEach((fn) => fn())
+  if (
+    next.loaded === state.loaded &&
+    next.total === state.total &&
+    next.error === state.error
+  ) {
+    return
+  }
+  pending = next
+  if (timer === null) timer = setTimeout(flush, THROTTLE_MS)
 }
 
 function subscribe(listener: () => void) {
