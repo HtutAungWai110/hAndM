@@ -16,6 +16,29 @@ interface CharacterProps {
 useLoader.preload(GLTFLoader, idleUrl, attachDRACO)
 useLoader.preload(GLTFLoader, kissUrl, attachDRACO)
 
+const textureKeys = [
+  'map', 'lightMap', 'bumpMap', 'normalMap', 'specularMap', 'aoMap',
+  'roughnessMap', 'metalnessMap', 'emissiveMap', 'alphaMap', 'envMap', 'displacementMap',
+] as const
+
+function disposeMeshResources(mesh: THREE.Mesh) {
+  mesh.geometry?.dispose()
+  const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
+  for (const mat of mats) {
+    for (const key of textureKeys) {
+      const tex = ((mat as unknown as Record<string, unknown>)[key] as THREE.Texture | null) ?? null
+      if (tex) tex.dispose()
+    }
+    mat.dispose()
+  }
+}
+
+function freeInactiveModel(scene: THREE.Object3D) {
+  scene.traverse((obj) => {
+    if ((obj as THREE.Mesh).isMesh) disposeMeshResources(obj as THREE.Mesh)
+  })
+}
+
 export function Character({ isKissing, onKissEnd }: CharacterProps) {
   const idleRef = useRef<Group>(null)
   const kissRef = useRef<Group>(null)
@@ -40,6 +63,11 @@ export function Character({ isKissing, onKissEnd }: CharacterProps) {
       })
     }
   }, [idle.scene, kiss.scene])
+
+  useEffect(() => {
+    const inactive = isKissing ? idle.scene : kiss.scene
+    freeInactiveModel(inactive)
+  }, [isKissing, idle.scene, kiss.scene])
 
   const idleAnims = idle.animations?.length > 0 ? idle.animations : []
   const kissAnims = kiss.animations?.length > 0 ? kiss.animations : []
