@@ -35,7 +35,7 @@ export function Scene() {
         gl={{ powerPreference: 'high-performance' }}
       >
         <Sky />
-        {/*<GrassField />*/}
+        <GrassField />
         <hemisphereLight
           color="#ffffff"
           groundColor="#8a7a55"
