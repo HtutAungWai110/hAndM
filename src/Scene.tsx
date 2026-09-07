@@ -8,7 +8,7 @@ import { useCallback, useState } from 'react'
 const CAMERA_POSITION = new THREE.Vector3(-0.018, 1.334, 0.92)
 const CAMERA_TARGET = new THREE.Vector3(0, 1.3, 0)
 const CAMERA_POSITION_MOBILE = new THREE.Vector3(0, 1, 2)
-const CAMERA_TARGET_MOBILE = new THREE.Vector3(0, 1.5, 0)
+const CAMERA_TARGET_MOBILE = new THREE.Vector3(0, 1.5, -1)
 
 function CameraLock() {
   const { camera, size } = useThree()

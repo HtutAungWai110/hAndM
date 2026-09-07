@@ -6,7 +6,7 @@ import { attachDRACO } from './draco'
 import grassUrl from './assets/scene/grass_compressed.glb'
 
 const WIND_SPEED = 0.4
-const WIND_FREQUENCY = 1.8
+const WIND_FREQUENCY = 0.1
 const WIND_STRENGTH = 0.21
 
 function collectGrassMeshes(scene: THREE.Object3D): THREE.Mesh[] {
