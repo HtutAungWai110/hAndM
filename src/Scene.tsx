@@ -22,7 +22,6 @@ function CameraLock() {
 
 export function Scene() {
   const [isKissing, setIsKissing] = useState(false)
-  const [glKey, setGlKey] = useState(0)
   const handleKissEnd = useCallback(() => setIsKissing(false), [])
   const isMobile = window.innerWidth < 640
   const initialCamera = isMobile ? CAMERA_POSITION_MOBILE : CAMERA_POSITION
@@ -30,18 +29,10 @@ export function Scene() {
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <Canvas
-        key={glKey}
         camera={{ position: initialCamera, fov: 50 }}
         shadows
-        dpr={isMobile ? [1, 1.5] : [1, 2]}
-        gl={{ antialias: !isMobile, powerPreference: 'high-performance' }}
-        onCreated={({ gl }) => {
-          gl.domElement.addEventListener('webglcontextlost', (e) => {
-            e.preventDefault()
-            console.warn('[webgl] context lost, remounting canvas')
-            setGlKey((k) => k + 1)
-          })
-        }}
+        dpr={[1, 2]}
+        gl={{ powerPreference: 'high-performance' }}
       >
         <Sky />
         <GrassField />
@@ -56,7 +47,7 @@ export function Scene() {
           intensity={1.5}
           color="#ffe0a0"
           castShadow
-          shadow-mapSize={isMobile ? [1024, 1024] : [2048, 2048]}
+          shadow-mapSize={[2048, 2048]}
           shadow-camera-left={-6}
           shadow-camera-right={6}
           shadow-camera-top={6}
