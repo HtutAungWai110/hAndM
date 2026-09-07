@@ -31,6 +31,8 @@ export function Scene() {
       <Canvas
         camera={{ position: initialCamera, fov: 50 }}
         shadows
+        dpr={[1, 2]}
+        gl={{ powerPreference: 'high-performance' }}
       >
         <Sky />
         <GrassField />

@@ -8,21 +8,30 @@ interface Props {
 interface State {
   hasError: boolean
   error: Error | null
+  recoveryKey: number
 }
 
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
-    this.state = { hasError: false, error: null }
+    this.state = { hasError: false, error: null, recoveryKey: 0 }
   }
 
   static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error }
+    return { hasError: true, error, recoveryKey: 0 }
   }
 
   componentDidCatch(error: Error) {
     console.error('[ErrorBoundary]', error)
     console.error('[ErrorBoundary stack]', error.stack)
+  }
+
+  private recover = () => {
+    this.setState((prev) => ({
+      hasError: false,
+      error: null,
+      recoveryKey: prev.recoveryKey + 1,
+    }))
   }
 
   render() {
@@ -52,10 +61,7 @@ export class ErrorBoundary extends Component<Props, State> {
               {this.state.error?.message ?? 'An unknown error occurred.'}
             </div>
             <button
-              onClick={() => {
-                this.setState({ hasError: false, error: null })
-                location.reload()
-              }}
+              onClick={this.recover}
               style={{
                 marginTop: 20,
                 padding: '10px 24px',
@@ -75,6 +81,6 @@ export class ErrorBoundary extends Component<Props, State> {
       )
     }
 
-    return this.props.children
+    return <div key={this.state.recoveryKey}>{this.props.children}</div>
   }
 }

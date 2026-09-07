@@ -1,31 +1,13 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useSyncExternalStore } from 'react'
 import { Scene } from './Scene'
 import { getSnapshot, subscribe } from './loader'
 import { ErrorBoundary } from './ErrorBoundary'
 
 function LoadingScreen() {
-  const { loaded, total, error } = useSyncExternalStore(subscribe, getSnapshot)
-  const [visible, setVisible] = useState(false)
-  const doneRef = useRef(false)
+  const { loaded, total, error, done } = useSyncExternalStore(subscribe, getSnapshot)
 
   const progress = total === 0 ? 0 : Math.min(100, Math.round((loaded / total) * 100))
-
-  useEffect(() => {
-    if (doneRef.current) return
-    if (total > 0 || error) setVisible(true)
-  }, [total, error])
-
-  useEffect(() => {
-    if (doneRef.current) return
-    if (error) return
-    if (total > 0 && loaded >= total) {
-      const t = setTimeout(() => {
-        doneRef.current = true
-        setVisible(false)
-      }, 600)
-      return () => clearTimeout(t)
-    }
-  }, [loaded, total, error])
+  const visible = !done && !error && total > 0
 
   return (
     <div
@@ -40,8 +22,8 @@ function LoadingScreen() {
         gap: 18,
         background: '#1f1f1f',
         color: '#fff',
-        opacity: visible ? 1 : 0,
-        pointerEvents: visible ? 'auto' : 'none',
+        opacity: error || visible ? 1 : 0,
+        pointerEvents: error || visible ? 'auto' : 'none',
         transition: 'opacity 0.6s ease',
         fontFamily: 'sans-serif',
       }}
