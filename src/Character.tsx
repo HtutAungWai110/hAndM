@@ -6,7 +6,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import * as THREE from 'three'
 import { attachDRACO } from './draco'
 import idleUrl from './assets/idle_compressed.glb'
-import kissUrl from './assets/boy_kiss_compressed.glb'
+import kissUrl from './assets/kiss_w_hearts_compressed.glb'
 
 interface CharacterProps {
   isKissing: boolean
