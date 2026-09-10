@@ -31,8 +31,8 @@ export function Scene() {
       <Canvas
         camera={{ position: initialCamera, fov: 50 }}
         shadows
-        dpr={[1, 2]}
-        gl={{ powerPreference: 'high-performance' }}
+        dpr={[1, 1]}
+        gl={{ antialias: !isMobile, powerPreference: 'high-performance', precision: isMobile ? 'mediump' : 'highp' }}
       >
         <Sky />
         <GrassField />
@@ -47,7 +47,7 @@ export function Scene() {
           intensity={1.5}
           color="#ffe0a0"
           castShadow
-          shadow-mapSize={[2048, 2048]}
+          shadow-mapSize={isMobile ? [512, 512] : [1024, 1024]}
           shadow-camera-left={-6}
           shadow-camera-right={6}
           shadow-camera-top={6}
