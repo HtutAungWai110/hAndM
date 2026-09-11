@@ -51,7 +51,7 @@ export function Scene() {
           intensity={1.5}
           color="#ffe0a0"
           castShadow
-          shadow-mapSize={isMobile ? [512, 512] : [1024, 1024]}
+          shadow-mapSize={[1024, 1024]}
           shadow-camera-left={-6}
           shadow-camera-right={6}
           shadow-camera-top={6}

@@ -113,13 +113,11 @@ export function Character({ isKissing, onKissEnd, isGivingFlowers, onFlowersEnd 
   }, [flowersAction, isGivingFlowers, flowersMixer, onFlowersEnd, flowersAnims.length])
 
   useFrame(() => {
-    if (!isKissing || !kissAction || finishedRef.current) return
-    if (kissAction.time >= kissAction.getClip().duration - 0.001) {
+    if (isKissing && kissAction && !finishedRef.current && kissAction.time >= kissAction.getClip().duration - 0.001) {
       finishedRef.current = true
       onKissEnd()
     }
-    if (!isGivingFlowers || !flowersAction || flowersFinishedRef.current) return
-    if (flowersAction.time >= flowersAction.getClip().duration - 0.001) {
+    if (isGivingFlowers && flowersAction && !flowersFinishedRef.current && flowersAction.time >= flowersAction.getClip().duration - 0.001) {
       flowersFinishedRef.current = true
       onFlowersEnd()
     }
