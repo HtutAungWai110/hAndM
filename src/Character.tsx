@@ -53,6 +53,28 @@ export function Character({ isKissing, onKissEnd, isGivingFlowers, onFlowersEnd 
     }
   }, [idle.scene, kiss.scene, flowers.scene])
 
+  // Warm the GPU pipeline for the hidden animation models. They are mounted with
+  // visible=false, so their geometry buffers are never uploaded and their shaders are
+  // never compiled until the first button press. Doing that all at click time in one
+  // synchronous burst crashes the WebKit tab on iOS ("Cannot open this page"). Render
+  // every model for two frames right after mount so upload+compile happens during the
+  // loading screen instead.
+  useEffect(() => {
+    const all = [idleRef.current, kissRef.current, flowersRef.current]
+    const groups = all.filter((g): g is Group => g !== null)
+    if (groups.length !== 3) return
+    const prev = groups.map((g) => g.visible)
+    for (const g of groups) g.visible = true
+    const restore = () => {
+      for (let i = 0; i < groups.length; i++) groups[i].visible = prev[i]
+    }
+    const id = requestAnimationFrame(() => requestAnimationFrame(restore))
+    return () => {
+      cancelAnimationFrame(id)
+      restore()
+    }
+  }, [])
+
   const idleAnims = idle.animations?.length > 0 ? idle.animations : []
   const kissAnims = kiss.animations?.length > 0 ? kiss.animations : []
   const flowersAnims = flowers.animations?.length > 0 ? flowers.animations : []
