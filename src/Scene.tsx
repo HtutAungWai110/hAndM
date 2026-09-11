@@ -4,6 +4,8 @@ import { GrassField } from './GrassField'
 import { Sky } from './Sky'
 import * as THREE from 'three'
 import { useCallback, useState } from 'react'
+import { Flower } from 'lucide-react'
+
 
 const CAMERA_POSITION = new THREE.Vector3(-0.018, 1.334, 0.92)
 const CAMERA_TARGET = new THREE.Vector3(0, 1.3, 0)
@@ -22,12 +24,14 @@ function CameraLock() {
 
 export function Scene() {
   const [isKissing, setIsKissing] = useState(false)
+  const [isGivingFlowers, setIsGivingFlowers] = useState(false)
   const handleKissEnd = useCallback(() => setIsKissing(false), [])
+  const handleFlowersEnd = useCallback(() => setIsGivingFlowers(false), [])
   const isMobile = window.innerWidth < 640
   const initialCamera = isMobile ? CAMERA_POSITION_MOBILE : CAMERA_POSITION
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+    <div className="relative w-full h-full">
       <Canvas
         camera={{ position: initialCamera, fov: 50 }}
         shadows
@@ -57,29 +61,25 @@ export function Scene() {
           shadow-bias={-0.0004}
           shadow-normalBias={0.02}
         />
-        <Character isKissing={isKissing} onKissEnd={handleKissEnd} />
+        <Character isKissing={isKissing} onKissEnd={handleKissEnd} isGivingFlowers={isGivingFlowers} onFlowersEnd={handleFlowersEnd} />
         <CameraLock />
       </Canvas>
-      <button
-        onClick={() => setIsKissing(true)}
-        style={{
-          position: 'fixed',
-          right: 24,
-          bottom: 24,
-          width: 72,
-          height: 72,
-          borderRadius: '50%',
-          border: 'none',
-          backgroundColor: '#e91e63',
-          color: '#fff',
-          fontSize: 17,
-          fontWeight: 700,
-          cursor: 'pointer',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-        }}
-      >
-        Kiss
-      </button>
+      <div className="fixed right-6 bottom-6 flex flex-col gap-3">
+        <button
+          disabled={isKissing || isGivingFlowers}
+          onClick={() => setIsKissing(true)}
+          className="relative w-[72px] h-[72px] rounded-full border-none bg-[#e91e63] text-white text-[17px] font-bold cursor-pointer shadow-[0_4px_12px_rgba(0,0,0,0.3)]"
+        >
+          Kiss
+        </button>
+        <button
+          disabled={isKissing || isGivingFlowers}
+          onClick={() => setIsGivingFlowers(true)}
+          className="relative w-[72px] h-[72px] flex items-center justify-center rounded-full border-none bg-[#ff9800] text-white text-[15px] font-bold cursor-pointer whitespace-nowrap px-3 shadow-[0_4px_12px_rgba(0,0,0,0.3)]"
+        >
+          <Flower className="w-10 h-10" />
+        </button>
+      </div>
     </div>
   )
 }
