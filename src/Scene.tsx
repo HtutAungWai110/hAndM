@@ -39,7 +39,7 @@ export function Scene() {
         gl={{ antialias: !isMobile, powerPreference: 'high-performance', precision: isMobile ? 'mediump' : 'highp' }}
       >
         <Sky />
-        <GrassField />
+        {/*<GrassField />*/}
         <hemisphereLight
           color="#ffffff"
           groundColor="#8a7a55"
