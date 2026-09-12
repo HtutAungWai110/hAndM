@@ -53,27 +53,42 @@ export function Character({ isKissing, onKissEnd, isGivingFlowers, onFlowersEnd 
     }
   }, [idle.scene, kiss.scene, flowers.scene])
 
-  // Warm the GPU pipeline for the hidden animation models. They are mounted with
-  // visible=false, so their geometry buffers are never uploaded and their shaders are
-  // never compiled until the first button press. Doing that all at click time in one
-  // synchronous burst crashes the WebKit tab on iOS ("Cannot open this page"). Render
-  // every model for two frames right after mount so upload+compile happens during the
-  // loading screen instead.
+  // The kiss/flowers GLBs re-embed the same characters, materials and textures as the
+  // idle model, but the GLTFLoader instantiates everything fresh per file. On a button
+  // press the browser then re-uploads ~46 duplicate textures and re-compiles ~47 shader
+  // programs in one synchronous burst, which kills the WebKit tab on iOS ("Cannot open
+  // this page"). Reuse the idle scene's material objects instead, so those programs and
+  // textures are shared. Materials only swap when the geometry attribute layouts match
+  // (same buffers, no morph targets), so shader compatibility is guaranteed; the few
+  // props (hearts/bouquet) use their own materials and are left untouched.
   useEffect(() => {
-    const all = [idleRef.current, kissRef.current, flowersRef.current]
-    const groups = all.filter((g): g is Group => g !== null)
-    if (groups.length !== 3) return
-    const prev = groups.map((g) => g.visible)
-    for (const g of groups) g.visible = true
-    const restore = () => {
-      for (let i = 0; i < groups.length; i++) groups[i].visible = prev[i]
+    const byName = new Map<string, { material: THREE.Material; ref: THREE.BufferGeometry }>()
+    idle.scene.traverse((obj) => {
+      const mesh = obj as THREE.Mesh
+      if (!mesh.isMesh || Array.isArray(mesh.material)) return
+      const material = mesh.material as THREE.Material
+      if (!material.name || byName.has(material.name)) return
+      byName.set(material.name, { material, ref: mesh.geometry })
+    })
+    const compatible = (g: THREE.BufferGeometry, ref: THREE.BufferGeometry) => {
+      const keys = Object.keys(g.attributes)
+      const refKeys = Object.keys(ref.attributes)
+      if (keys.length !== refKeys.length) return false
+      for (const k of refKeys) if (!(k in g.attributes)) return false
+      if (g.morphAttributes && Object.keys(g.morphAttributes).length) return false
+      if (ref.morphAttributes && Object.keys(ref.morphAttributes).length) return false
+      return true
     }
-    const id = requestAnimationFrame(() => requestAnimationFrame(restore))
-    return () => {
-      cancelAnimationFrame(id)
-      restore()
+    for (const scene of [kiss.scene, flowers.scene]) {
+      scene.traverse((obj) => {
+        const mesh = obj as THREE.Mesh
+        if (!mesh.isMesh || Array.isArray(mesh.material)) return
+        const hit = byName.get((mesh.material as THREE.Material).name)
+        if (!hit || !compatible(mesh.geometry, hit.ref)) return
+        mesh.material = hit.material
+      })
     }
-  }, [])
+  }, [idle.scene, kiss.scene, flowers.scene])
 
   const idleAnims = idle.animations?.length > 0 ? idle.animations : []
   const kissAnims = kiss.animations?.length > 0 ? kiss.animations : []
